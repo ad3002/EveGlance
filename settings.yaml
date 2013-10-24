@@ -1,0 +1,2 @@
+eve_central:
+  url_onpath: "http://api.eve-central.com/api/quicklook/onpath/from/%(from_system)s/to/%(to_system)s/fortype/%(item_id)s"
