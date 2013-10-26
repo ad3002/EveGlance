@@ -90,15 +90,20 @@ def convert_duration(duration):
     (d, h, m, s) = items
     return s + m * 60 + h * 60 * 60 + d * 60 * 60 * 24
    
-def load_dump(dump_file):
+def load_dump(dump_file, output_file):
     """
     "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
     """
+
     with open(dump_file) as fh:
         data = fh.readlines()[1:]
     result = []
-    for line in data:
-        items = line.strip().split('","')
+    for i, line in enumerate(data):
+        line = line.strip()
+        if not line:
+            continue
+        print i, "\r",
+        items = line.split('","')
         try:
           assert len(items) == 15
         except:
@@ -134,7 +139,16 @@ def load_dump(dump_file):
           "reportedtime": reportedtime,
         }
 
-        print  d
+        result.append(d)
+    print
+    print "Join data"
+    data = "\n".join(result)
+    print "Save data"
+    with open(output_file, "w") as fh:
+        fh.write(data)
+    upload_command = "mongoimport --upsert -d EM -c History %s " % output_file
+    print upload_command
+    os.system(upload_command)
 
 
 settings_file = "/home/akomissarov/Dropbox/EveGlance/settings.yaml"
@@ -143,7 +157,8 @@ with open(settings_file) as fh:
 # parse_items_to_json(settings)
 
 dump_file = "/storage1/akomissarov/em/2013-02-05.dump"
-load_dump(dump_file)
+output_file = "/storage1/akomissarov/em/2013-02-05.json"
+load_dump(dump_file, output_file)
 
 # url = settings["url_onpath"]
 
