@@ -107,12 +107,12 @@ def load_dump(dump_file):
 
 
 
-        date_object = datetime.strptime(items[10], '%Y-%m-%d  %I:%M:%S')
+        date_object = datetime.strptime(items[10], '%Y-%m-%d %H:%M:%S')
         issued = calendar.timegm(date_object.utctimetuple())
 
-        duration = convert_duration(duration)
+        duration = convert_duration(items[11])
 
-        date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d  %I:%M:%S.%f')
+        date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
         reportedtime = calendar.timegm(date_object.utctimetuple())
 
 
