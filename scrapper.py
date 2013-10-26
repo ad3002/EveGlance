@@ -117,7 +117,10 @@ def load_dump(dump_file, output_file):
 
         duration = convert_duration(items[11])
 
-        date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
+        if "." in items[14]:
+          date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
+        else:
+          date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S')
         reportedtime = calendar.timegm(date_object.utctimetuple())
 
 
@@ -150,6 +153,25 @@ def load_dump(dump_file, output_file):
     print upload_command
     os.system(upload_command)
 
+def download_daily_dumps():
+    """
+    """
+    url = "http://eve-central.com/dumps/2013-%s%s-%s%s.dump.gz"
+    for m in xrange(8,9):
+      for d in xrange(1,32):
+        if m < 10:
+          m1 = 0
+        else:
+          m1 = ''
+        if d < 10:
+          d1 = 0
+        else:
+          d1 = ''
+        purl = url % (m1, m, d1, d)
+        command = "nohup wget -c %s > /dev/null &" % purl
+        print command
+        os.system(command)
+
 
 settings_file = "/home/akomissarov/Dropbox/EveGlance/settings.yaml"
 with open(settings_file) as fh:
@@ -158,7 +180,8 @@ with open(settings_file) as fh:
 
 dump_file = "/storage1/akomissarov/em/2013-02-05.dump"
 output_file = "/storage1/akomissarov/em/2013-02-05.json"
-load_dump(dump_file, output_file)
+# load_dump(dump_file, output_file)
+download_daily_dumps()
 
 # url = settings["url_onpath"]
 
