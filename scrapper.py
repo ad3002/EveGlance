@@ -1,6 +1,15 @@
-import sys, os
-import urllib, urllib2
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#@created: 07.09.2010
+#@author: Aleksey Komissarov
+#@contact: ad3002@gmail.com
+"""
+API to eve market
+"""
+import urllib2
 from lxml import objectify
+import yaml
 
 def make_request(url):
         """Makes a request to external resource."""
@@ -20,10 +29,14 @@ def make_request(url):
         content = page.read()
         return content
 
+settings_file = "settings.yaml"
+with open(settings_file) as fh:
+    settings = yaml.load(fh)
 
-data =  _request(url)
+url = settings["url_onpath"]
+
+data = make_request(url)
 
 root = objectify.fromstring(data)
 print min([x.price for x in root.quicklook.sell_orders.iterchildren()])
 print max([x.price for x in root.quicklook.buy_orders.iterchildren()])
-	
