@@ -164,7 +164,7 @@ def load_dump(dump_file, output_file):
 def download_daily_dumps(year=2013):
     """
     """
-    url = "http://eve-central.com/dumps/%s-%s%s-%s%s.dump.gz" % year
+    url = "http://eve-central.com/dumps/%s-%s%s-%s%s.dump.gz"
     for m in xrange(0,13):
       for d in xrange(0,32):
         if m < 10:
@@ -175,7 +175,7 @@ def download_daily_dumps(year=2013):
           d1 = 0
         else:
           d1 = ''
-        purl = url % (m1, m, d1, d)
+        purl = url % (year, m1, m, d1, d)
         command = "nohup wget -c %s > /dev/null &" % purl
         print command
         os.system(command)
