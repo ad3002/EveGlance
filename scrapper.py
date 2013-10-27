@@ -16,14 +16,18 @@ import os
 from datetime import datetime
 import calendar
 
+
 def make_request(url):
-    """Makes a request to external resource."""
+    """Makes a request to external resource.
+    @param url: url
+    """
+
     hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-          'Accept-Encoding': 'none',
-          'Accept-Language': 'en-US,en;q=0.8',
-          'Connection': 'keep-alive'
+           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+           'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+           'Accept-Encoding': 'none',
+           'Accept-Language': 'en-US,en;q=0.8',
+           'Connection': 'keep-alive'
     }
     req = urllib2.Request(url, headers=hdr)
     print "Load:", url
@@ -37,6 +41,8 @@ def make_request(url):
 
 def parse_items_to_json(settings):
     """
+    @settings eve_central.url_items: url to items file
+    @settings eve_central.items_json_file: output file with json dump
     """
     url = settings["eve_central"]["url_items"]
     output_file = settings["eve_central"]["items_json_file"]
@@ -49,7 +55,7 @@ def parse_items_to_json(settings):
     for i, line in enumerate(data):
         items = line.strip().split("|")
         if len(items) != 8:
-          continue
+            continue
         items = [x.strip() for x in items]
 
         def unknown_item(x):
@@ -157,7 +163,7 @@ def download_daily_dumps():
     """
     """
     url = "http://eve-central.com/dumps/2013-%s%s-%s%s.dump.gz"
-    for m in xrange(8,9):
+    for m in xrange(4,6):
       for d in xrange(1,32):
         if m < 10:
           m1 = 0
