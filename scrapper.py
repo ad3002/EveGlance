@@ -7,6 +7,7 @@
 """
 API to eve market
 """
+import argparse
 import urllib2
 import simplejson
 from lxml import objectify
@@ -15,6 +16,7 @@ import re
 import os
 from datetime import datetime
 import calendar
+from _trseeker.analyse.get_all_iap import output_file
 
 
 def make_request(url):
@@ -41,6 +43,7 @@ def make_request(url):
 
 def parse_items_to_json(settings):
     """
+    Download item index, parse it, and upload to MongoDB.
     @settings eve_central.url_items: url to items file
     @settings eve_central.items_json_file: output file with json dump
     """
@@ -90,6 +93,7 @@ def parse_items_to_json(settings):
 
 def convert_duration(duration):
     """
+    Convert bid duration to seconds.
     """
     items = re.findall("(\d+).*?(\d+):(\d+):(\d+)", duration)[0]
     items = map(int, items)
@@ -99,9 +103,10 @@ def convert_duration(duration):
 
 def load_dump(dump_file, output_file):
     """
-    "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
+    Convert dump file to json and save it into file.
+    Data fields:
+        "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
     """
-
     with open(dump_file) as fh:
         data = fh.readlines()[1:]
     result = []
@@ -112,12 +117,10 @@ def load_dump(dump_file, output_file):
         print i, "\r",
         items = line.split('","')
         try:
-          assert len(items) == 15
+            assert len(items) == 15
         except:
-          print items
-          exit()
-
-
+            print items
+            exit()
 
         date_object = datetime.strptime(items[10], '%Y-%m-%d %H:%M:%S')
         issued = calendar.timegm(date_object.utctimetuple())
@@ -125,9 +128,9 @@ def load_dump(dump_file, output_file):
         duration = convert_duration(items[11])
 
         if "." in items[14]:
-          date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
+            date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
         else:
-          date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S')
+            date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S')
         reportedtime = calendar.timegm(date_object.utctimetuple())
 
 
@@ -163,6 +166,7 @@ def load_dump(dump_file, output_file):
 
 def download_daily_dumps(year=2013):
     """
+    Download daily dumps from eve central.
     """
     url = "http://eve-central.com/dumps/%s-%s%s-%s%s.dump.gz"
     for m in xrange(0,13):
@@ -180,21 +184,26 @@ def download_daily_dumps(year=2013):
         print command
         os.system(command)
 
+def get_settings():
+    """
+    Load settings.
+    """
+    settings_file = "/home/akomissarov/Dropbox/EveGlance/settings.yaml"
+    with open(settings_file) as fh:
+        settings = yaml.load(fh)
+    return settings
 
-settings_file = "/home/akomissarov/Dropbox/EveGlance/settings.yaml"
-with open(settings_file) as fh:
-    settings = yaml.load(fh)
-# parse_items_to_json(settings)
 
+if __name__ == '__main__':
 
-dump_file = "/storage1/akomissarov/em/2013-02-05.dump"
-output_file = "/storage1/akomissarov/em/2013-02-05.json"
-# load_dump(dump_file, output_file)
-download_daily_dumps()
+    settings = get_settings()
 
-# url = settings["url_onpath"]
-
-# data = make_request(url)
+    parser = argparse.ArgumentParser(description='Do sometings.')
+    parser.add_argument('-i','--input', help='Input dump file', required=True)
+    args = vars(parser.parse_args())
+    dump_file = args["input"]
+    output_file = dump_file.strip(".")[-2] + ".json"
+    load_dump(dump_file, output_file)
 
 # root = objectify.fromstring(data)
 # print min([x.price for x in root.quicklook.sell_orders.iterchildren()])
