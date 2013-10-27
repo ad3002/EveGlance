@@ -95,7 +95,8 @@ def convert_duration(duration):
     items = map(int, items)
     (d, h, m, s) = items
     return s + m * 60 + h * 60 * 60 + d * 60 * 60 * 24
-   
+
+
 def load_dump(dump_file, output_file):
     """
     "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
@@ -159,12 +160,13 @@ def load_dump(dump_file, output_file):
     print upload_command
     os.system(upload_command)
 
-def download_daily_dumps():
+
+def download_daily_dumps(year=2013):
     """
     """
-    url = "http://eve-central.com/dumps/2013-%s%s-%s%s.dump.gz"
-    for m in xrange(4,6):
-      for d in xrange(1,32):
+    url = "http://eve-central.com/dumps/%s-%s%s-%s%s.dump.gz" % year
+    for m in xrange(0,13):
+      for d in xrange(0,32):
         if m < 10:
           m1 = 0
         else:
@@ -183,6 +185,7 @@ settings_file = "/home/akomissarov/Dropbox/EveGlance/settings.yaml"
 with open(settings_file) as fh:
     settings = yaml.load(fh)
 # parse_items_to_json(settings)
+
 
 dump_file = "/storage1/akomissarov/em/2013-02-05.dump"
 output_file = "/storage1/akomissarov/em/2013-02-05.json"
