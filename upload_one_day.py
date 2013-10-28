@@ -8,13 +8,15 @@
 API to eve market
 """
 import argparse
-import simplejson
-from lxml import objectify
-import yaml
-from EveGlance.scrapper import load_dump
+from EveGlance.scrapper import load_dump, get_settings
+
 
 def load_dumps_to_json(year=2013, m=1, d=12):
     """
+    Upload data to server by date.
+    @param year: year (default 2013)
+    @param m: month
+    @param d: day
     """
     file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.dump"
     output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.json"
@@ -30,8 +32,8 @@ def load_dumps_to_json(year=2013, m=1, d=12):
     output_fn = output_file_name % (year, m1, m, d1, d)
     load_dump(input_fn, output_fn, mongo=True)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     settings = get_settings()
     parser = argparse.ArgumentParser(description='Upload file by day and month.')
     parser.add_argument('-m','--month', help='Month', required=True)
