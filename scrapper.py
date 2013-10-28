@@ -16,7 +16,6 @@ import re
 import os
 from datetime import datetime
 import calendar
-from _trseeker.analyse.get_all_iap import output_file
 
 
 def make_request(url):
@@ -101,15 +100,17 @@ def convert_duration(duration):
     return s + m * 60 + h * 60 * 60 + d * 60 * 60 * 24
 
 
-def load_dump(dump_file, output_file):
+def load_dump(dump_file, output_file, mongo=False):
     """
     Convert dump file to json and save it into file.
     Data fields:
         "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
     """
+    print "Load data from", dump_file
     with open(dump_file) as fh:
         data = fh.readlines()[1:]
     result = []
+    print "Parse data from", dump_file
     for i, line in enumerate(data):
         line = line.strip()
         if not line:
@@ -152,17 +153,18 @@ def load_dump(dump_file, output_file):
           "reportedtime": reportedtime,
         }
 
-        result.append(d)
+        result.append(simplejson.dumps(d))
     print
     print "Join data"
     data = "\n".join(result)
     print "Save data"
     with open(output_file, "w") as fh:
         fh.write(data)
-    upload_command = "mongoimport --upsert -d EM -c History %s " % output_file
-    print upload_command
-    os.system(upload_command)
-
+    if mongo:
+        print "Upload data"
+        upload_command = "mongoimport --upsert -d EM -c History %s " % output_file
+        print upload_command
+        os.system(upload_command)
 
 def download_daily_dumps(year=2013):
     """
@@ -194,16 +196,48 @@ def get_settings():
     return settings
 
 
+def load_dumps_to_json(year=2013, m_from=1, m_to=12):
+    """
+    """
+    file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.dump"
+    output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.json"
+    for m in xrange(m_from,m_to+1):
+      for d in xrange(1,32):
+        if m < 10:
+          m1 = 0
+        else:
+          m1 = ''
+        if d < 10:
+          d1 = 0
+        else:
+          d1 = ''
+        input_fn = file_name % (year, m1, m, d1, d)
+        output_fn = output_file_name % (year, m1, m, d1, d)
+        load_dump(input_fn, output_fn, mongo=True)
+
+#if __name__ == '__main__':
+#
+#    settings = get_settings()
+#
+#    parser = argparse.ArgumentParser(description='Do sometings.')
+#    parser.add_argument('-i','--input', help='Input dump file', required=True)
+#    parser.add_argument('-m','--mongo', help='Upload to mongo', required=False, default=False)
+#    args = vars(parser.parse_args())
+#    dump_file = args["input"]
+#    mongo = args["mongo"]
+#    output_file = dump_file.split(".")[0] + ".json"
+#    load_dump(dump_file, output_file, mongo=mongo)
+
 if __name__ == '__main__':
 
     settings = get_settings()
-
     parser = argparse.ArgumentParser(description='Do sometings.')
-    parser.add_argument('-i','--input', help='Input dump file', required=True)
+    parser.add_argument('-f','--month_from', help='Month from', required=True)
+    parser.add_argument('-t','--month_to', help='Month to', required=True)
     args = vars(parser.parse_args())
-    dump_file = args["input"]
-    output_file = dump_file.strip(".")[-2] + ".json"
-    load_dump(dump_file, output_file)
+    mf = int(args["month_from"])
+    mt = int(args["month_to"])
+    load_dumps_to_json(year=2013, m_from=mf, m_to=mt)
 
 # root = objectify.fromstring(data)
 # print min([x.price for x in root.quicklook.sell_orders.iterchildren()])
