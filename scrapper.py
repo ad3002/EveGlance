@@ -203,6 +203,7 @@ def load_dumps_to_json(year=2013, m_from=1, m_to=12):
     output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.json"
     for m in xrange(m_from,m_to+1):
       for d in xrange(1,32):
+        print "Month", m, "Day", d
         if m < 10:
           m1 = 0
         else:
@@ -213,7 +214,10 @@ def load_dumps_to_json(year=2013, m_from=1, m_to=12):
           d1 = ''
         input_fn = file_name % (year, m1, m, d1, d)
         output_fn = output_file_name % (year, m1, m, d1, d)
-        load_dump(input_fn, output_fn, mongo=True)
+        if os.path.isfile(output_fn):
+            print "Skipped:", file_name
+            continue
+        load_dump(input_fn, output_fn, mongo=False)
 
 #if __name__ == '__main__':
 #
