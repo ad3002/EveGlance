@@ -221,7 +221,7 @@ def convert_and_clean_dump(dump_file, output_file):
     print "Print sort data"
     result.sort()
     print "Format data"
-    result = ["%s\n" % "\t".join(map(int, x)) for x in result]
+    result = ["%s\n" % "\t".join(map(str, x)) for x in result]
     with open(output_file, "w") as fh:
         fh.writelines(result)
 
