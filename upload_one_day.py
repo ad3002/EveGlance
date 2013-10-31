@@ -8,7 +8,7 @@
 API to eve market
 """
 import argparse
-from EveGlance.scrapper import load_dump, get_settings
+from EveGlance.scrapper import load_dump, get_settings, convert_and_clean_dump
 
 
 def load_dumps_to_json(year=2013, m=1, d=12):
@@ -19,7 +19,7 @@ def load_dumps_to_json(year=2013, m=1, d=12):
     @param d: day
     """
     file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.dump"
-    output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.json"
+    output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.dat"
     if m < 10:
       m1 = 0
     else:
@@ -30,7 +30,7 @@ def load_dumps_to_json(year=2013, m=1, d=12):
       d1 = ''
     input_fn = file_name % (year, m1, m, d1, d)
     output_fn = output_file_name % (year, m1, m, d1, d)
-    load_dump(input_fn, output_fn, mongo=True)
+    convert_and_clean_dump(input_fn, output_fn)
 
 
 if __name__ == '__main__':
