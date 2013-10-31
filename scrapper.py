@@ -166,6 +166,73 @@ def load_dump(dump_file, output_file, mongo=False):
         print upload_command
         os.system(upload_command)
 
+def convert_and_clean_dump(dump_file, output_file):
+    """
+    Read dump file, sort it by orderid, and save as tab delimietd file.
+    Data fields:
+        "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
+    """
+    print "Load data from", dump_file
+    with open(dump_file) as fh:
+        data = fh.readlines()[1:]
+    result = []
+    print "Parse data from", dump_file
+    for i, line in enumerate(data):
+        line = line.strip()
+        if not line:
+            continue
+        print i, "\r",
+        items = line.split('","')
+        try:
+            assert len(items) == 15
+        except:
+            print items
+            exit()
+
+        date_object = datetime.strptime(items[10], '%Y-%m-%d %H:%M:%S')
+        issued = calendar.timegm(date_object.utctimetuple())
+
+        duration = convert_duration(items[11])
+
+        if "." in items[14]:
+            date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
+        else:
+            date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S')
+        reportedtime = calendar.timegm(date_object.utctimetuple())
+
+
+        d = {
+          "orderid": int(items[0][1:]),
+          "regionid": int(items[1]),
+          "systemid": int(items[2]),
+          "stationid": int(items[3]),
+          "typeid": int(items[4]),
+          "bid": int(items[5]),
+          "price": float(items[6]),
+          "minvolume": int(items[7]),
+          "volremain": int(items[8]),
+          "volenter": int(items[9]),
+          "issued": issued,
+          "duration": duration,
+          "range": int(items[12]),
+          "reportedby": int(items[13]),
+          "reportedtime": reportedtime,
+        }
+
+        result.append(simplejson.dumps(d))
+    print
+    print "Join data"
+    data = "\n".join(result)
+    print "Save data"
+    with open(output_file, "w") as fh:
+        fh.write(data)
+    if mongo:
+        print "Upload data"
+        upload_command = "mongoimport --upsert -d EM -c History %s " % output_file
+        print upload_command
+        os.system(upload_command)
+
+
 def download_daily_dumps(year=2013):
     """
     Download daily dumps from eve central.
