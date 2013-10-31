@@ -174,7 +174,7 @@ def convert_and_clean_dump(dump_file, output_file):
     """
     print "Load data from", dump_file
     with open(dump_file) as fh:
-        data = fh.readlines()[1:]
+        data = fh.readlines()[1:] # skip header
     result = []
     print "Parse data from", dump_file
     for i, line in enumerate(data):
@@ -188,12 +188,9 @@ def convert_and_clean_dump(dump_file, output_file):
         except:
             print items
             exit()
-
         date_object = datetime.strptime(items[10], '%Y-%m-%d %H:%M:%S')
         issued = calendar.timegm(date_object.utctimetuple())
-
         duration = convert_duration(items[11])
-
         if "." in items[14]:
             date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
         else:
@@ -201,36 +198,32 @@ def convert_and_clean_dump(dump_file, output_file):
         reportedtime = calendar.timegm(date_object.utctimetuple())
 
 
-        d = {
-          "orderid": int(items[0][1:]),
-          "regionid": int(items[1]),
-          "systemid": int(items[2]),
-          "stationid": int(items[3]),
-          "typeid": int(items[4]),
-          "bid": int(items[5]),
-          "price": float(items[6]),
-          "minvolume": int(items[7]),
-          "volremain": int(items[8]),
-          "volenter": int(items[9]),
-          "issued": issued,
-          "duration": duration,
-          "range": int(items[12]),
-          "reportedby": int(items[13]),
-          "reportedtime": reportedtime,
-        }
+        d = [
+          int(items[0][1:]),
+          int(items[1]),
+          int(items[2]),
+          int(items[3]),
+          int(items[4]),
+          int(items[5]),
+          float(items[6]),
+          int(items[7]),
+          int(items[8]),
+          int(items[9]),
+          issued,
+          duration,
+          int(items[12]),
+          int(items[13]),
+          reportedtime,
+        ]
 
-        result.append(simplejson.dumps(d))
+        result.append(d)
     print
-    print "Join data"
-    data = "\n".join(result)
-    print "Save data"
+    print "Print sort data"
+    result.sort()
+    print "Format data"
+    result = ["%s\n" % "\t".join(map(int, x)) for x in result]
     with open(output_file, "w") as fh:
-        fh.write(data)
-    if mongo:
-        print "Upload data"
-        upload_command = "mongoimport --upsert -d EM -c History %s " % output_file
-        print upload_command
-        os.system(upload_command)
+        fh.writelines(result)
 
 
 def download_daily_dumps(year=2013):
