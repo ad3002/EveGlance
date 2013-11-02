@@ -166,7 +166,7 @@ def load_dump(dump_file, output_file, mongo=False):
         print upload_command
         os.system(upload_command)
 
-def convert_and_clean_dump(dump_file, output_file):
+def convert_and_clean_dump(dump_file, output_file, jita_output_file):
     """
     Read dump file, sort it by orderid, and save as tab delimietd file.
     Data fields:
@@ -174,80 +174,27 @@ def convert_and_clean_dump(dump_file, output_file):
     """
     print "Load data from", dump_file
     dataset = []
+    jita_dataset = []
     with open(dump_file) as fh:
-        for items in csv.reader(fh, delimiter=',', quotechar='"')]:
-          d = [
-            int(items[0]),
-            int(items[1]),
-            int(items[2]),
-            int(items[3]),
-            int(items[4]),
-            int(items[5]),
-            float(items[6]),
-            int(items[7]),
-            int(items[8]),
-            int(items[9]),
-            items[10],
-            items[11],
-            int(items[12]),
-            int(items[13]),
-            items[14],
-          ]
-          dataset.append(d)
-
-
-    print "Parse data from", dump_file
-    k = 0
-    for i, line in enumerate(data):
-        line = line.strip()
-        if not line:
-            continue
-        print i, k, "\r",
-        items = line.split('","')
-        try:
-            assert len(items) == 15
-        except:
-            print items
-            exit()
-        if not items[3] == '60003760':
-            continue
-        k += 1
-        date_object = datetime.strptime(items[10], '%Y-%m-%d %H:%M:%S')
-        issued = calendar.timegm(date_object.utctimetuple())
-        duration = convert_duration(items[11])
-        if "." in items[14]:
-            date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S.%f')
-        else:
-            date_object = datetime.strptime(items[14][:-1], '%Y-%m-%d %H:%M:%S')
-        reportedtime = calendar.timegm(date_object.utctimetuple())
-
-
-        d = [
-          int(items[0][1:]),
-          int(items[1]),
-          int(items[2]),
-          int(items[3]),
-          int(items[4]),
-          int(items[5]),
-          float(items[6]),
-          int(items[7]),
-          int(items[8]),
-          int(items[9]),
-          issued,
-          duration,
-          int(items[12]),
-          int(items[13]),
-          reportedtime,
-        ]
-
-        result.append(d)
+        for i, items in enumerate(csv.reader(fh, delimiter=',', quotechar='"')):
+          if i % 100000 == 0:
+            print i, "\r",
+          if items[3] == "60003760":
+            jita_dataset.append(items)
+          else:
+            dataset.append(items)
     print
     print "Print sort data"
-    result.sort()
+    dataset.sort()
+    jita_dataset.sort()
     print "Format data"
-    result = ["%s\n" % "\t".join(map(str, x)) for x in result]
+    dataset = ["%s\n" % "\t".join(x) for x in dataset]
+    jita_dataset = ["%s\n" % "\t".join(x) for x in jita_dataset]
     with open(output_file, "w") as fh:
         fh.writelines(result)
+    with open(jita_output_file, "w") as fh:
+        fh.writelines(jita_dataset)
+        
 
 
 def download_daily_dumps(year=2013):
