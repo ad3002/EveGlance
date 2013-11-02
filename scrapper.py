@@ -173,10 +173,29 @@ def convert_and_clean_dump(dump_file, output_file):
         "orderid","regionid","systemid","stationid","typeid","bid","price","minvolume","volremain","volenter","issued","duration","range","reportedby","reportedtime"
     """
     print "Load data from", dump_file
+    dataset = []
     with open(dump_file) as fh:
-        data = [x for x in csv.reader(fh, delimiter=',', quotechar='"')]
-    exit()
-    result = []
+        for items in csv.reader(fh, delimiter=',', quotechar='"')]:
+          d = [
+            int(items[0]),
+            int(items[1]),
+            int(items[2]),
+            int(items[3]),
+            int(items[4]),
+            int(items[5]),
+            float(items[6]),
+            int(items[7]),
+            int(items[8]),
+            int(items[9]),
+            items[10],
+            items[11],
+            int(items[12]),
+            int(items[13]),
+            items[14],
+          ]
+          dataset.append(d)
+
+
     print "Parse data from", dump_file
     k = 0
     for i, line in enumerate(data):
