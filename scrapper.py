@@ -16,7 +16,7 @@ import re
 import os
 from datetime import datetime
 import calendar
-
+import csv
 
 def make_request(url):
     """Makes a request to external resource.
@@ -174,20 +174,25 @@ def convert_and_clean_dump(dump_file, output_file):
     """
     print "Load data from", dump_file
     with open(dump_file) as fh:
-        data = fh.readlines()[1:] # skip header
+        data = [x for x in csv.reader(fh, delimiter=',', quotechar='"')]
+    exit()
     result = []
     print "Parse data from", dump_file
+    k = 0
     for i, line in enumerate(data):
         line = line.strip()
         if not line:
             continue
-        print i, "\r",
+        print i, k, "\r",
         items = line.split('","')
         try:
             assert len(items) == 15
         except:
             print items
             exit()
+        if not items[3] == '60003760':
+            continue
+        k += 1
         date_object = datetime.strptime(items[10], '%Y-%m-%d %H:%M:%S')
         issued = calendar.timegm(date_object.utctimetuple())
         duration = convert_duration(items[11])
