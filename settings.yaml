@@ -2,3 +2,5 @@ eve_central:
   url_onpath: "http://api.eve-central.com/api/quicklook/onpath/from/%(from_system)s/to/%(to_system)s/fortype/%(item_id)s"
   url_items: "http://eve-central.com/dumps/meta/types.txt"
   items_json_file: "items.json"
+hub_id:
+  Jita: 60003760
