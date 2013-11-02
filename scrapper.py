@@ -177,21 +177,22 @@ def convert_and_clean_dump(dump_file, output_file, jita_output_file):
     jita_dataset = []
     with open(dump_file) as fh:
         for i, items in enumerate(csv.reader(fh, delimiter=',', quotechar='"')):
-          if i % 100000 == 0:
-            print i, "\r",
+          print i, "\r",
           if items[3] == "60003760":
             jita_dataset.append(items)
           else:
             dataset.append(items)
     print
-    print "Print sort data"
+    print "Sort data without Jita"
     dataset.sort()
+    print "Sort data for Jita"
     jita_dataset.sort()
     print "Format data"
     dataset = ["%s\n" % "\t".join(x) for x in dataset]
     jita_dataset = ["%s\n" % "\t".join(x) for x in jita_dataset]
+    print "Save data"
     with open(output_file, "w") as fh:
-        fh.writelines(result)
+        fh.writelines(dataset)
     with open(jita_output_file, "w") as fh:
         fh.writelines(jita_dataset)
         
