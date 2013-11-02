@@ -20,6 +20,7 @@ def load_dumps_to_json(year=2013, m=1, d=12):
     """
     file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.dump"
     output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.dat"
+    jita_output_file_name = "/storage1/akomissarov/em/%s-%s%s-%s%s.jita.dat"
     if m < 10:
       m1 = 0
     else:
@@ -30,7 +31,8 @@ def load_dumps_to_json(year=2013, m=1, d=12):
       d1 = ''
     input_fn = file_name % (year, m1, m, d1, d)
     output_fn = output_file_name % (year, m1, m, d1, d)
-    convert_and_clean_dump(input_fn, output_fn)
+    jita_output_fn = jita_output_file_name % (year, m1, m, d1, d)
+    convert_and_clean_dump(input_fn, output_fn, jita_output_fn)
 
 
 if __name__ == '__main__':
