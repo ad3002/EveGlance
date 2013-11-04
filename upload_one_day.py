@@ -5,11 +5,11 @@
 #@author: Aleksey Komissarov
 #@contact: ad3002@gmail.com
 """
-API to eve market
+API to eve central
 """
 import argparse
-from EveGlance.scrapper import load_dump, get_settings, convert_and_clean_dump
-
+from EveGlance.eve_central_raw_data import convert_and_clean_dump
+import simplejson
 
 def load_dumps_to_json(year=2013, m=1, d=12):
     """
@@ -34,9 +34,8 @@ def load_dumps_to_json(year=2013, m=1, d=12):
     jita_output_fn = jita_output_file_name % (year, m1, m, d1, d)
     convert_and_clean_dump(input_fn, output_fn, jita_output_fn)
 
-
 if __name__ == '__main__':
-    settings = get_settings()
+    
     parser = argparse.ArgumentParser(description='Upload file by day and month.')
     parser.add_argument('-m','--month', help='Month', required=True)
     parser.add_argument('-d','--day', help='Day', required=True)
@@ -44,3 +43,4 @@ if __name__ == '__main__':
     m = int(args["month"])
     d = int(args["day"])
     load_dumps_to_json(m=m, d=d)
+
